@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -29,6 +30,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,6 +85,7 @@ public class MainActivity extends ActionBarActivity {
         Log.i("prefs login state", String.valueOf(isLogin));
 
         final Button loginOutButton = (Button) findViewById(R.id.loginout_button);
+        final TextView responseResultTextView = (TextView) findViewById(R.id.responseResult);
         if(isLogin) {
             loginOutButton.setText("Logout");
         } else {
@@ -113,8 +116,10 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     loginOutButton.setText("Login");
                     userNameEditText.setText("");
+                    userPasswordEditText.setText("");
                     userName = "";
                     userPassword = "";
+                    responseResultTextView.setText("");
 
 //                    SharedPreferences.Editor ed = sharedPrefs.edit();
 //                    ed.remove("userName");
@@ -132,7 +137,7 @@ public class MainActivity extends ActionBarActivity {
         String receivedIntentAction = intent.getAction();
 
         // If run app without intent, receivedIntentAction is Intent.ACTION_MAIN
-        if(receivedIntentAction.equals(Intent.ACTION_SEND)) {
+        if(receivedIntentAction.equals(Intent.ACTION_SEND) && isLogin) {
 //            Log.i("intentAction", receivedIntentAction);
 //            Log.i("intentType", intent.getType());
 
@@ -161,13 +166,21 @@ public class MainActivity extends ActionBarActivity {
             해당 사용자의 다운로드 폴더에 화상을 다운받게 하는 것이 맞는듯 함.
             */
 
-            new HttpTask().execute(url);
+            int statusCode = 0;
+            try {
+                statusCode = new HttpTask().execute(url).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
 
 
-
-
-//            loginOutButton.setText(loginOutButtonText);
-
+            if(statusCode == 200) {
+                responseResultTextView.setText("crawling ok");
+            } else {
+                responseResultTextView.setText("crawling error");
+            }
 
         } else {
             Log.i("Not SEND", "Not SEND");
@@ -177,10 +190,10 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    class HttpTask extends AsyncTask<String, Void, Void> {
+    class HttpTask extends AsyncTask<String, Void, Integer> {
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             HttpRequestFactory httpRequestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
                 @Override
                 public void initialize(HttpRequest request) throws IOException {
@@ -200,11 +213,12 @@ public class MainActivity extends ActionBarActivity {
             }
 
 
+            int statusCode = 0;
             try {
                 HttpRequest httpRequest = httpRequestFactory.buildPostRequest(url, new UrlEncodedContent(params2));
 
                 HttpResponse httpResponse = httpRequest.execute();
-                int statusCode = httpResponse.getStatusCode();
+                statusCode = httpResponse.getStatusCode();
 
                 Log.i("statusCode", String.valueOf(statusCode));
 
@@ -212,7 +226,7 @@ public class MainActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
 
-            return null;
+            return statusCode;
         }
     }
 

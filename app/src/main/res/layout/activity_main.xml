@@ -51,6 +51,28 @@
         android:layout_height="wrap_content"
         android:text="Login"
         android:id="@+id/loginout_button"
+        android:layout_below="@+id/responseResultTextView"
+        android:layout_toRightOf="@+id/userPasswordTextView"
+        android:layout_toEndOf="@+id/userPasswordTextView"
+        android:layout_marginTop="35dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Response Result :"
+        android:id="@+id/responseResultTextView"
         android:layout_below="@+id/userPasswordEditText"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/responseResult"
+        android:layout_below="@+id/userPasswordEditText"
+        android:layout_toRightOf="@+id/responseResultTextView"
+        android:layout_toEndOf="@+id/responseResultTextView" />
+
 </RelativeLayout>
